@@ -9,18 +9,31 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "@types/node": "^18.15.5",
-    "@types/react": "^18.0.28",
-    "@types/react-dom": "^18.0.11",
-    "monaco-editor": "^0.36.1",
-    "monaco-themes": "^0.4.4",
-    "typescript": "^4.9.3",
-    "vite": "^4.2.0",
+    "@types/node": "^22.15.21",
+    "@types/react": "^19.1.5",
+    "@types/react-dom": "^19.1.5",
+    "monaco-editor": "^0.52.2",
+    "monaco-themes": "^0.4.5",
+    "typescript": "^5.8.3",
+    "vite": "^6.3.5",
     "vite-plugin-monaco-editor": "^1.1.0",
-    "vite-plugin-static-copy": "^1.0.1"
+    "vite-plugin-static-copy": "^3.0.0"
   },
   "volta": {
     "node": "18.15.0",
     "yarn": "3.5.0"
-  }
+  },
+  "description": "> Monaco Editor instance running in an embeddable iframe with an easy-to-use messaging and parameter API",
+  "main": "index.js",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/lukasbach/embeddable-monaco.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/lukasbach/embeddable-monaco/issues"
+  },
+  "homepage": "https://github.com/lukasbach/embeddable-monaco#readme"
 }
