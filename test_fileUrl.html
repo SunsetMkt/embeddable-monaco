@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>测试 fileUrl 功能</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            line-height: 1.6;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        .test-case {
+            margin-bottom: 30px;
+            border: 1px solid #ddd;
+            padding: 15px;
+            border-radius: 5px;
+        }
+        h2 {
+            margin-top: 0;
+            color: #333;
+        }
+        iframe {
+            width: 100%;
+            height: 300px;
+            border: 1px solid #ccc;
+            margin-top: 10px;
+        }
+        .controls {
+            margin-top: 10px;
+        }
+        button {
+            padding: 5px 10px;
+            margin-right: 10px;
+        }
+        pre {
+            background-color: #f5f5f5;
+            padding: 10px;
+            border-radius: 3px;
+            overflow: auto;
+        }
+        .log {
+            margin-top: 10px;
+            max-height: 150px;
+            overflow-y: auto;
+            background-color: #f9f9f9;
+            padding: 10px;
+            border: 1px solid #eee;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>测试 fileUrl 参数功能</h1>
+        
+        <div class="test-case">
+            <h2>测试 1: 本地文件加载</h2>
+            <p>从本地 public 目录加载 sample.js 文件</p>
+            <iframe id="iframe1" src="http://localhost:5173?fileUrl=http://localhost:5173/sample.js&lang=javascript"></iframe>
+            <div class="log" id="log1"></div>
+        </div>
+        
+        <div class="test-case">
+            <h2>测试 2: 远程文件加载</h2>
+            <p>从 GitHub 加载远程文件</p>
+            <iframe id="iframe2" src="http://localhost:5173?fileUrl=https://raw.githubusercontent.com/SunsetMkt/embeddable-monaco/main/src/embed.ts&lang=typescript"></iframe>
+            <div class="log" id="log2"></div>
+        </div>
+        
+        <div class="test-case">
+            <h2>测试 3: 优先级测试</h2>
+            <p>同时提供 fileUrl 和 code 参数，验证 fileUrl 优先级更高</p>
+            <iframe id="iframe3" src="http://localhost:5173?fileUrl=http://localhost:5173/sample.js&code=// 这段代码不应该显示，因为 fileUrl 参数应该优先&lang=javascript"></iframe>
+            <div class="log" id="log3"></div>
+        </div>
+        
+        <div class="test-case">
+            <h2>测试 4: 错误处理</h2>
+            <p>加载不存在的文件，验证错误处理和回退到 code 参数</p>
+            <iframe id="iframe4" src="http://localhost:5173?fileUrl=http://localhost:5173/not_exist.js&code=// fileUrl 加载失败，应该显示这段代码&lang=javascript"></iframe>
+            <div class="log" id="log4"></div>
+        </div>
+    </div>
+
+    <script>
+        function setupIframeListener(iframeId, logId) {
+            const iframe = document.getElementById(iframeId);
+            const log = document.getElementById(logId);
+            
+            window.addEventListener('message', (event) => {
+                if (event.source === iframe.contentWindow) {
+                    const message = JSON.stringify(event.data, null, 2);
+                    const timestamp = new Date().toLocaleTimeString();
+                    log.innerHTML += `<pre>[${timestamp}] ${message}</pre>`;
+                    log.scrollTop = log.scrollHeight;
+                }
+            });
+        }
+        
+        // 设置所有 iframe 的消息监听
+        setupIframeListener('iframe1', 'log1');
+        setupIframeListener('iframe2', 'log2');
+        setupIframeListener('iframe3', 'log3');
+        setupIframeListener('iframe4', 'log4');
+    </script>
+</body>
+</html>

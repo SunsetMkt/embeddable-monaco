@@ -56,6 +56,7 @@ the implementation file [src/embed.ts](src/embed.ts).
 The following query parameters are supported:
 
 - `code`: Initial code, defaults to empty
+- `fileUrl`: URL to load file content from, has higher priority than `code` parameter
 - `lang`: Initial language, defaults to javascript
 - `theme`: Initial theme, defaults to vs-light
   - Also supports all of these themes: https://github.com/brijeshb42/monaco-themes/blob/master/themes/themelist.json
@@ -75,6 +76,22 @@ The following query parameters are supported:
 - `dontPostValueOnChange`: In the `change` handler, don't post the value back to the parent frame every time the model is changed
 - `context`: a string that is passed back in every message sent back from the iframe
 
+### Using the fileUrl parameter
+
+The `fileUrl` parameter allows you to load content from a URL directly into the editor. This is useful when you want to display content from an external source without having to fetch it yourself.
+
+```html
+<!-- Load content from a remote file -->
+<iframe src="https://embeddable-monaco.lukasbach.com?fileUrl=https://raw.githubusercontent.com/example/repo/main/example.js&lang=javascript" id="iframe"></iframe>
+```
+
+Notes about the `fileUrl` parameter:
+
+- If both `fileUrl` and `code` parameters are provided, `fileUrl` takes precedence
+- If loading from the URL fails, the editor will fall back to the `code` parameter value (if provided)
+- Cross-origin restrictions apply when loading files from different domains
+- The editor will attempt to load the file asynchronously before initializing
+
 ## Messaging API
 
 ### Messages sent by the iframe to the parent
@@ -90,6 +107,7 @@ iframe.addEventListener('message', (e) => {
 Messages sent by the iframe:
 
 - `{ type: "ready" }`: Sent when the editor is ready
+- `{ type: "ready", error: string }`: Sent when the editor is ready but encountered an error (e.g., when loading from `fileUrl` fails)
 - `{ type: "change", value: string }`: Sent everytime the editor value changes
 - `{ type: "content", value: string }`: Sent when the editor content is requested via `get-content` message
 
