@@ -59,6 +59,18 @@ const initializeEditorContent = async (): Promise<string> => {
     return params.code ?? '';
 };
 
+// 获取当前脚本的基础路径，用于相对路径加载
+const getBasePath = () => {
+    // 获取当前脚本的URL
+    const scripts = document.getElementsByTagName('script');
+    const currentScript = scripts[scripts.length - 1];
+    const scriptSrc = currentScript.src;
+    
+    // 提取基础路径（去掉文件名部分）
+    const basePath = scriptSrc.substring(0, scriptSrc.lastIndexOf('/') + 1);
+    return basePath.substring(0, basePath.lastIndexOf('/src/') + 1); // 回到项目根目录
+};
+
 // 异步初始化编辑器
 const initializeEditor = async () => {
     try {
@@ -81,7 +93,14 @@ const initializeEditor = async () => {
         }
 
         const loadTheme = async (themeName: string | undefined): Promise<monaco.editor.IStandaloneThemeData | undefined> => {
-            return themeName ? fetch("/themes/" + themeName + ".json").then(res => res.json()) : Promise.resolve(undefined);
+            if (!themeName) return Promise.resolve(undefined);
+            
+            // 使用相对路径加载主题文件
+            const basePath = getBasePath();
+            const themePath = `${basePath}themes/${themeName}.json`;
+            console.log(`Loading theme from: ${themePath}`);
+            
+            return fetch(themePath).then(res => res.json());
         }
 
         const customTheme = getCustomThemeName(params.theme);
