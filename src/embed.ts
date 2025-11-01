@@ -38,7 +38,20 @@ const getBuiltinTheme = (theme: string | undefined) => {
 }
 
 const loadTheme = async (themeName: string | undefined): Promise<monaco.editor.IStandaloneThemeData | undefined> => {
-    return themeName ? fetch("/themes/" + themeName + ".json").then(res => res.json()) : Promise.resolve(undefined);
+    if (!themeName) return Promise.resolve(undefined);
+    try {
+        // Use relative path from the base URL to support non-root deployments
+        const baseUrl = new URL('.', window.location.href);
+        const themeUrl = new URL(`themes/${themeName}.json`, baseUrl);
+        const res = await fetch(themeUrl.href);
+        if (!res.ok) {
+            throw new Error(`Failed to load theme: ${res.statusText}`);
+        }
+        return await res.json();
+    } catch (error) {
+        console.error(`Error loading theme ${themeName}:`, error);
+        return undefined;
+    }
 }
 
 const customTheme = getCustomThemeName(params.theme);
@@ -74,6 +87,32 @@ const changeBackground = async (color: string, theme?: string) => {
 
 if (params.background) {
     changeBackground(params.background, params.theme);
+}
+
+// Load file from URL if fileUrl parameter is provided
+if (params.fileUrl) {
+    (async () => {
+        try {
+            const response = await fetch(params.fileUrl);
+            if (!response.ok) {
+                throw new Error(`Failed to load file: ${response.status} ${response.statusText}`);
+            }
+            const content = await response.text();
+            
+            // Check if we received HTML instead of the expected file content
+            // This can happen with dev servers that return HTML for non-existent routes
+            const contentType = response.headers.get('content-type') || '';
+            if (contentType.includes('text/html') && content.includes('<!DOCTYPE') && !params.fileUrl.endsWith('.html')) {
+                throw new Error(`Received HTML instead of expected file content. The file may not exist.`);
+            }
+            
+            editor.setValue(content);
+        } catch (error) {
+            const errorMessage = `Error loading file from ${params.fileUrl}:\n${error instanceof Error ? error.message : String(error)}`;
+            console.error(errorMessage);
+            editor.setValue(errorMessage);
+        }
+    })();
 }
 
 if (params.javascriptDefaults) {

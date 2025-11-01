@@ -56,6 +56,7 @@ the implementation file [src/embed.ts](src/embed.ts).
 The following query parameters are supported:
 
 - `code`: Initial code, defaults to empty
+- `fileUrl`: URL to load initial code from a remote file. If loading fails, an error message will be displayed in the editor. This parameter takes precedence over `code` if both are provided.
 - `lang`: Initial language, defaults to javascript
 - `theme`: Initial theme, defaults to vs-light
   - Also supports all of these themes: https://github.com/brijeshb42/monaco-themes/blob/master/themes/themelist.json
