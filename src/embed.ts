@@ -37,7 +37,7 @@ const getBuiltinTheme = (theme: string | undefined) => {
     return theme && builtinThemes.includes(theme) ? theme : undefined
 }
 
-const loadTheme = async (themeName: string | undefined): Promise<monaco.editor.IStandaloneThemeData> => {
+const loadTheme = async (themeName: string | undefined): Promise<monaco.editor.IStandaloneThemeData | undefined> => {
     return themeName ? fetch("/themes/" + themeName + ".json").then(res => res.json()) : Promise.resolve(undefined);
 }
 
@@ -56,7 +56,7 @@ const changeBackground = async (color: string, theme?: string) => {
     const customTheme = await loadTheme(getCustomThemeName(theme));
 
     const custombgTheme = {
-        base: getBuiltinTheme(theme) ?? getBuiltinTheme(customTheme.base) ?? 'vs' as any,
+        base: getBuiltinTheme(theme) ?? getBuiltinTheme(customTheme?.base) ?? 'vs' as any,
         inherit: customTheme?.inherit ?? true,
         rules: customTheme?.rules ?? [],
         colors: {
