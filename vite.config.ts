@@ -5,6 +5,7 @@ console.log(monacoEditorPlugin)
 
 // https://vitejs.dev/config/
 export default defineConfig({
+  base: './',
   plugins: [
     (monacoEditorPlugin as any).default({}),
   ],

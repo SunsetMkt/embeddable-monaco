@@ -1,10 +1,46 @@
-import * as monaco from 'monaco-editor';
-// @ts-ignore
-import { parseTmTheme } from "monaco-themes";
-
+// Get URL params early to determine locale before importing monaco
 const params = new Proxy<any>(new URLSearchParams(window.location.search), {
     get: (searchParams, prop) => searchParams.get(String(prop)),
 });
+
+// Set locale before importing monaco-editor if locale parameter is provided
+if (params.locale) {
+    const { setLocaleData } = await import('monaco-editor-nls');
+    
+    const localeMap: Record<string, () => Promise<any>> = {
+        'cs': () => import('monaco-editor-nls/locale/cs.json'),
+        'de': () => import('monaco-editor-nls/locale/de.json'),
+        'es': () => import('monaco-editor-nls/locale/es.json'),
+        'fr': () => import('monaco-editor-nls/locale/fr.json'),
+        'it': () => import('monaco-editor-nls/locale/it.json'),
+        'ja': () => import('monaco-editor-nls/locale/ja.json'),
+        'ko': () => import('monaco-editor-nls/locale/ko.json'),
+        'pl': () => import('monaco-editor-nls/locale/pl.json'),
+        'pt-br': () => import('monaco-editor-nls/locale/pt-br.json'),
+        'ru': () => import('monaco-editor-nls/locale/ru.json'),
+        'tr': () => import('monaco-editor-nls/locale/tr.json'),
+        'zh-cn': () => import('monaco-editor-nls/locale/zh-hans.json'),
+        'zh-hans': () => import('monaco-editor-nls/locale/zh-hans.json'),
+        'zh-tw': () => import('monaco-editor-nls/locale/zh-hant.json'),
+        'zh-hant': () => import('monaco-editor-nls/locale/zh-hant.json'),
+    };
+    
+    const normalizedLocale = params.locale.toLowerCase();
+    const localeLoader = localeMap[normalizedLocale];
+    
+    if (localeLoader) {
+        try {
+            const localeData = await localeLoader();
+            setLocaleData(localeData.default || localeData);
+        } catch (error) {
+            console.error(`Failed to load locale ${params.locale}:`, error);
+        }
+    }
+}
+
+import * as monaco from 'monaco-editor';
+// @ts-ignore
+import { parseTmTheme } from "monaco-themes";
 
 const send = (obj: any) => window.top?.postMessage({ ...obj, context: params.context }, '*');
 const receive = (type: string, cb: (e: any) => void) =>
@@ -38,7 +74,20 @@ const getBuiltinTheme = (theme: string | undefined) => {
 }
 
 const loadTheme = async (themeName: string | undefined): Promise<monaco.editor.IStandaloneThemeData | undefined> => {
-    return themeName ? fetch("/themes/" + themeName + ".json").then(res => res.json()) : Promise.resolve(undefined);
+    if (!themeName) return Promise.resolve(undefined);
+    try {
+        // Use relative path from the base URL to support non-root deployments
+        const baseUrl = new URL('.', window.location.href);
+        const themeUrl = new URL(`themes/${themeName}.json`, baseUrl);
+        const res = await fetch(themeUrl.href);
+        if (!res.ok) {
+            throw new Error(`Failed to load theme: ${res.statusText}`);
+        }
+        return await res.json();
+    } catch (error) {
+        console.error(`Error loading theme ${themeName}:`, error);
+        return undefined;
+    }
 }
 
 const customTheme = getCustomThemeName(params.theme);
@@ -74,6 +123,32 @@ const changeBackground = async (color: string, theme?: string) => {
 
 if (params.background) {
     changeBackground(params.background, params.theme);
+}
+
+// Load file from URL if fileUrl parameter is provided
+if (params.fileUrl) {
+    (async () => {
+        try {
+            const response = await fetch(params.fileUrl);
+            if (!response.ok) {
+                throw new Error(`Failed to load file: ${response.status} ${response.statusText}`);
+            }
+            const content = await response.text();
+            
+            // Check if we received HTML instead of the expected file content
+            // This can happen with dev servers that return HTML for non-existent routes
+            const contentType = response.headers.get('content-type') || '';
+            if (contentType.includes('text/html') && content.includes('<!DOCTYPE') && !params.fileUrl.endsWith('.html')) {
+                throw new Error(`Received HTML instead of expected file content. The file may not exist.`);
+            }
+            
+            editor.setValue(content);
+        } catch (error) {
+            const errorMessage = `Error loading file from ${params.fileUrl}:\n${error instanceof Error ? error.message : String(error)}`;
+            console.error(errorMessage);
+            editor.setValue(errorMessage);
+        }
+    })();
 }
 
 if (params.javascriptDefaults) {
