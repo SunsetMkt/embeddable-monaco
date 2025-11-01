@@ -76,9 +76,16 @@ const getBuiltinTheme = (theme: string | undefined) => {
 const loadTheme = async (themeName: string | undefined): Promise<monaco.editor.IStandaloneThemeData | undefined> => {
     if (!themeName) return Promise.resolve(undefined);
     try {
+        // Sanitize theme name to prevent directory traversal
+        const sanitizedThemeName = themeName.replace(/[^a-zA-Z0-9_-]/g, '');
+        if (!sanitizedThemeName || sanitizedThemeName !== themeName) {
+            console.error(`Invalid theme name: ${themeName}`);
+            return undefined;
+        }
+        
         // Use relative path from the base URL to support non-root deployments
         const baseUrl = new URL('.', window.location.href);
-        const themeUrl = new URL(`themes/${themeName}.json`, baseUrl);
+        const themeUrl = new URL(`themes/${sanitizedThemeName}.json`, baseUrl);
         const res = await fetch(themeUrl.href);
         if (!res.ok) {
             throw new Error(`Failed to load theme: ${res.statusText}`);
