@@ -101,10 +101,12 @@ if (params.fileUrl) {
             
             // Check if we received HTML instead of the expected file content
             // This can happen with dev servers that return HTML for non-existent routes
+            /**
             const contentType = response.headers.get('content-type') || '';
             if (contentType.includes('text/html') && content.includes('<!DOCTYPE') && !params.fileUrl.endsWith('.html')) {
                 throw new Error(`Received HTML instead of expected file content. The file may not exist.`);
             }
+            */
             
             editor.setValue(content);
         } catch (error) {
