@@ -45,18 +45,22 @@ if (isAutoLanguage) {
     // Extract filename from fileUrl if provided, otherwise use a default
     let filename = 'file.txt';
     if (params.fileUrl) {
-        // Extract filename from URL
+        // Extract filename from URL, handling query params and fragments
         try {
             const url = new URL(params.fileUrl, window.location.href);
-            const pathParts = url.pathname.split('/');
-            filename = pathParts[pathParts.length - 1] || 'file.txt';
+            const pathParts = url.pathname.split('/').filter(Boolean);
+            const filenameWithParams = pathParts[pathParts.length - 1];
+            // Remove query parameters and fragments
+            filename = filenameWithParams?.split('?')[0]?.split('#')[0] || 'file.txt';
         } catch {
             filename = 'file.txt';
         }
     }
     
+    // Don't set initial code if fileUrl will load content later
+    const initialCode = params.fileUrl ? '' : (params.code ?? '');
     const model = monaco.editor.createModel(
-        params.code ?? '',
+        initialCode,
         undefined, // Let Monaco infer language from URI
         monaco.Uri.file(filename)
     );
