@@ -11,9 +11,13 @@ const receive = (type: string, cb: (e: any) => void) =>
     window.addEventListener('message', (e) =>
         e.data.type === type && cb(e.data));
 
+// Determine if we should use auto language detection
+const isAutoLanguage = params.lang === 'auto';
+const language = isAutoLanguage ? undefined : (params.lang ?? 'javascript');
+
 const options: monaco.editor.IStandaloneEditorConstructionOptions = {
     value: params.code ?? '',
-    language: params.lang ?? 'javascript',
+    language: language,
     theme: params.theme ?? 'vs',
     contextmenu: params.contextmenu !== 'false',
     folding: params.folding !== 'false',
@@ -28,7 +32,40 @@ const options: monaco.editor.IStandaloneEditorConstructionOptions = {
 console.log("options are", options);
 const builtinThemes = ['vs', 'vs-dark', 'hc-black', 'hc-light'];
 
-const editor = monaco.editor.create(document.getElementById('root') ?? document.body, options);
+let editor: monaco.editor.IStandaloneCodeEditor;
+
+if (isAutoLanguage) {
+    // When lang=auto, create editor without model first
+    editor = monaco.editor.create(document.getElementById('root') ?? document.body, {
+        ...options,
+        model: null,
+    });
+    
+    // Create a model with a URI to enable language auto-detection
+    // Use filename parameter if provided, or extract from fileUrl, otherwise use a default
+    let filename = params.filename;
+    if (!filename && params.fileUrl) {
+        // Extract filename from URL
+        try {
+            const url = new URL(params.fileUrl, window.location.href);
+            const pathParts = url.pathname.split('/');
+            filename = pathParts[pathParts.length - 1] || 'file.txt';
+        } catch {
+            filename = 'file.txt';
+        }
+    }
+    filename = filename ?? 'file.txt';
+    
+    const model = monaco.editor.createModel(
+        params.code ?? '',
+        undefined, // Let Monaco infer language from URI
+        monaco.Uri.file(filename)
+    );
+    editor.setModel(model);
+} else {
+    // Standard editor creation with explicit language
+    editor = monaco.editor.create(document.getElementById('root') ?? document.body, options);
+}
 
 const getCustomThemeName = (theme: string | undefined) => {
     return theme && !builtinThemes.includes(theme) ? theme : undefined
