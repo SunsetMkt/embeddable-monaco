@@ -42,9 +42,9 @@ if (isAutoLanguage) {
     });
     
     // Create a model with a URI to enable language auto-detection
-    // Use filename parameter if provided, or extract from fileUrl, otherwise use a default
-    let filename = params.filename;
-    if (!filename && params.fileUrl) {
+    // Extract filename from fileUrl if provided, otherwise use a default
+    let filename = 'file.txt';
+    if (params.fileUrl) {
         // Extract filename from URL
         try {
             const url = new URL(params.fileUrl, window.location.href);
@@ -54,7 +54,6 @@ if (isAutoLanguage) {
             filename = 'file.txt';
         }
     }
-    filename = filename ?? 'file.txt';
     
     const model = monaco.editor.createModel(
         params.code ?? '',

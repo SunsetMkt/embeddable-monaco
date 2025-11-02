@@ -41,14 +41,14 @@ window.addEventListener("message", ({ data }) => {
 
 ### Auto Language Detection Example
 
-When you want Monaco to automatically detect the language based on the file extension:
+When you want Monaco to automatically detect the language based on the file extension from a URL:
 
 ```html
-<!-- Python code with auto-detection -->
-<iframe src="https://embeddable-monaco.lukasbach.com?lang=auto&filename=script.py&code=def hello():%0A    print('Hello World')" id="iframe"></iframe>
+<!-- Load Python code with auto-detection from URL -->
+<iframe src="https://embeddable-monaco.lukasbach.com?lang=auto&fileUrl=https://example.com/script.py" id="iframe"></iframe>
 
-<!-- JavaScript code with auto-detection -->
-<iframe src="https://embeddable-monaco.lukasbach.com?lang=auto&filename=app.js&code=function hello() { console.log('Hello'); }" id="iframe"></iframe>
+<!-- Load JavaScript code with auto-detection from URL -->
+<iframe src="https://embeddable-monaco.lukasbach.com?lang=auto&fileUrl=https://example.com/app.js" id="iframe"></iframe>
 ```
 
 
@@ -68,10 +68,9 @@ the implementation file [src/embed.ts](src/embed.ts).
 The following query parameters are supported:
 
 - `code`: Initial code, defaults to empty
-- `fileUrl`: URL to load initial code from a remote file. If loading fails, an error message will be displayed in the editor. This parameter takes precedence over `code` if both are provided.
+- `fileUrl`: URL to load initial code from a remote file. If loading fails, an error message will be displayed in the editor. This parameter takes precedence over `code` if both are provided. When `lang=auto`, the filename from the URL is used for language detection.
 - `lang`: Initial language, defaults to javascript
-  - Set to `auto` to enable automatic language detection based on file extension
-- `filename`: Filename with extension (e.g., "example.py", "script.js") used for language auto-detection when `lang=auto`. If not provided with `lang=auto`, will attempt to extract from `fileUrl`, or fall back to plain text
+  - Set to `auto` to enable automatic language detection based on the file extension from `fileUrl`
 - `theme`: Initial theme, defaults to vs-light
   - Also supports all of these themes: https://github.com/brijeshb42/monaco-themes/blob/master/themes/themelist.json
   - Use the value of the theme as name, e.g. "Vibrant Ink"
