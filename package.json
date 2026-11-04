@@ -12,6 +12,7 @@
     "@types/node": "^26.6.6",
     "@types/react": "^19.3.0",
     "@types/react-dom": "^19.3.0",
+    "esbuild": "^0.28.2",
     "monaco-editor": "^0.57.0",
     "monaco-themes": "^0.4.8",
     "typescript": "^7.0.2",

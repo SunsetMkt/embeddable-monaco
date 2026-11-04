@@ -158,14 +158,14 @@ if (params.fileUrl) {
 }
 
 if (params.javascriptDefaults) {
-    monaco.languages.typescript.javascriptDefaults.setDiagnosticsOptions({
+    monaco.typescript.javascriptDefaults.setDiagnosticsOptions({
         noSemanticValidation: params.javascriptDefaultsNoSemanticValidation === 'true',
         noSyntaxValidation: params.javascriptDefaultsNoSyntaxValidation === 'true',
     });
 }
 
 if (params.typescriptDefaults) {
-    monaco.languages.typescript.typescriptDefaults.setDiagnosticsOptions({
+    monaco.typescript.typescriptDefaults.setDiagnosticsOptions({
         noSemanticValidation: params.typescriptDefaultsNoSemanticValidation === 'true',
         noSyntaxValidation: params.typescriptDefaultsNoSyntaxValidation === 'true',
     });
@@ -207,13 +207,13 @@ receive('get-content', () => {
 });
 
 receive('change-javascript-defaults', e => {
-    monaco.languages.typescript.javascriptDefaults.setDiagnosticsOptions(e.diagnosticsOptions);
-    monaco.languages.typescript.javascriptDefaults.setCompilerOptions(e.compilerOptions);
+    monaco.typescript.javascriptDefaults.setDiagnosticsOptions(e.diagnosticsOptions);
+    monaco.typescript.javascriptDefaults.setCompilerOptions(e.compilerOptions);
 });
 
 receive('change-typescript-defaults', e => {
-    monaco.languages.typescript.typescriptDefaults.setDiagnosticsOptions(e.diagnosticsOptions);
-    monaco.languages.typescript.typescriptDefaults.setCompilerOptions(e.compilerOptions);
+    monaco.typescript.typescriptDefaults.setDiagnosticsOptions(e.diagnosticsOptions);
+    monaco.typescript.typescriptDefaults.setCompilerOptions(e.compilerOptions);
 });
 
 send({
